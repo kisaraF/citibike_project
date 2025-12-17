@@ -2,9 +2,9 @@
 name = "citibike_project"
 version = "0.0.1"
 authors = [{ name = "kisarawenu@gmail.com" }]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.12"
 dependencies = [
-    "databricks-connect>=15.4.17",
+    "databricks-connect==16.4.10",
     # Any dependencies for jobs and pipelines in this project can be added here
     # See also https://docs.databricks.com/dev-tools/bundles/library-dependencies
     #
@@ -18,7 +18,7 @@ dependencies = [
 dev = [
     "pytest",
     "databricks-dlt",
-    "databricks-connect>=15.4,<15.5",
+    "databricks-connect==16.4.*",
 ]
 
 [project.scripts]
