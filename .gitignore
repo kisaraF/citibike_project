@@ -10,3 +10,4 @@ scratch/**
 **/!explorations/README.md
 .venv/
 citibike_etl/notebooks/01_bronze/sample.py
+other/module_imports.py
