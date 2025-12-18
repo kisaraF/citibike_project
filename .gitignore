@@ -11,3 +11,4 @@ scratch/**
 .venv/
 citibike_etl/notebooks/01_bronze/sample.py
 other/module_imports.py
+other/test.py

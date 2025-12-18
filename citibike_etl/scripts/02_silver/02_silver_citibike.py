@@ -5,8 +5,8 @@ import sys
 project_root = Path().resolve().parents[2]
 sys.path.append(str(project_root))
 
-from src.citibike.citibike_utils import get_trip_duration_mins
-from src.utils.datetime_utils import timestamp_to_date_col
+from citibike_project.citibike.citibike_utils import get_trip_duration_mins
+from citibike_project.utils.datetime_utils import timestamp_to_date_col
 from pyspark.sql.functions import create_map, lit
 
 # To retrieve the parameters at the job run time for metadata
