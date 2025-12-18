@@ -7,11 +7,15 @@ project, including tests under resources/.
 import os, sys, pathlib
 from contextlib import contextmanager
 
+proj_root = pathlib.Path().resolve().parents[2]
+sys.path.append(proj_root)
+
 
 try:
-    from databricks.connect import DatabricksSession
-    from databricks.sdk import WorkspaceClient
-    from pyspark.sql import SparkSession
+    # from databricks.connect import DatabricksSession
+    # from databricks.sdk import WorkspaceClient
+    # from pyspark.sql import SparkSession
+    from citibike_project.utils.get_spark_session import create_spark_session
     import pytest
     import json
     import csv
@@ -23,7 +27,7 @@ except ImportError:
 
 
 @pytest.fixture()
-def spark() -> SparkSession:
+def spark():
     """Provide a SparkSession fixture for tests.
 
     Minimal example:
@@ -31,68 +35,69 @@ def spark() -> SparkSession:
             df = spark.createDataFrame([(1,)], ["x"])
             assert df.count() == 1
     """
-    return DatabricksSession.builder.getOrCreate()
+    spark = create_spark_session()
+    return spark
 
 
-@pytest.fixture()
-def load_fixture(spark: SparkSession):
-    """Provide a callable to load JSON or CSV from fixtures/ directory.
+# @pytest.fixture()
+# def load_fixture(spark: SparkSession):
+#     """Provide a callable to load JSON or CSV from fixtures/ directory.
 
-    Example usage:
+#     Example usage:
 
-        def test_using_fixture(load_fixture):
-            data = load_fixture("my_data.json")
-            assert data.count() >= 1
-    """
+#         def test_using_fixture(load_fixture):
+#             data = load_fixture("my_data.json")
+#             assert data.count() >= 1
+#     """
 
-    def _loader(filename: str):
-        path = pathlib.Path(__file__).parent.parent / "fixtures" / filename
-        suffix = path.suffix.lower()
-        if suffix == ".json":
-            rows = json.loads(path.read_text())
-            return spark.createDataFrame(rows)
-        if suffix == ".csv":
-            with path.open(newline="") as f:
-                rows = list(csv.DictReader(f))
-            return spark.createDataFrame(rows)
-        raise ValueError(f"Unsupported fixture type for: {filename}")
+#     def _loader(filename: str):
+#         path = pathlib.Path(__file__).parent.parent / "fixtures" / filename
+#         suffix = path.suffix.lower()
+#         if suffix == ".json":
+#             rows = json.loads(path.read_text())
+#             return spark.createDataFrame(rows)
+#         if suffix == ".csv":
+#             with path.open(newline="") as f:
+#                 rows = list(csv.DictReader(f))
+#             return spark.createDataFrame(rows)
+#         raise ValueError(f"Unsupported fixture type for: {filename}")
 
-    return _loader
-
-
-def _enable_fallback_compute():
-    """Enable serverless compute if no compute is specified."""
-    conf = WorkspaceClient().config
-    if conf.serverless_compute_id or conf.cluster_id or os.environ.get("SPARK_REMOTE"):
-        return
-
-    url = "https://docs.databricks.com/dev-tools/databricks-connect/cluster-config"
-    print("☁️ no compute specified, falling back to serverless compute", file=sys.stderr)
-    print(f"  see {url} for manual configuration", file=sys.stdout)
-
-    os.environ["DATABRICKS_SERVERLESS_COMPUTE_ID"] = "auto"
+#     return _loader
 
 
-@contextmanager
-def _allow_stderr_output(config: pytest.Config):
-    """Temporarily disable pytest output capture."""
-    capman = config.pluginmanager.get_plugin("capturemanager")
-    if capman:
-        with capman.global_and_fixture_disabled():
-            yield
-    else:
-        yield
+# def _enable_fallback_compute():
+#     """Enable serverless compute if no compute is specified."""
+#     conf = WorkspaceClient().config
+#     if conf.serverless_compute_id or conf.cluster_id or os.environ.get("SPARK_REMOTE"):
+#         return
+
+#     url = "https://docs.databricks.com/dev-tools/databricks-connect/cluster-config"
+#     print("☁️ no compute specified, falling back to serverless compute", file=sys.stderr)
+#     print(f"  see {url} for manual configuration", file=sys.stdout)
+
+#     os.environ["DATABRICKS_SERVERLESS_COMPUTE_ID"] = "auto"
 
 
-def pytest_configure(config: pytest.Config):
-    """Configure pytest session."""
-    with _allow_stderr_output(config):
-        _enable_fallback_compute()
+# @contextmanager
+# def _allow_stderr_output(config: pytest.Config):
+#     """Temporarily disable pytest output capture."""
+#     capman = config.pluginmanager.get_plugin("capturemanager")
+#     if capman:
+#         with capman.global_and_fixture_disabled():
+#             yield
+#     else:
+#         yield
 
-        # Initialize Spark session eagerly, so it is available even when
-        # SparkSession.builder.getOrCreate() is used. For DB Connect 15+,
-        # we validate version compatibility with the remote cluster.
-        if hasattr(DatabricksSession.builder, "validateSession"):
-            DatabricksSession.builder.validateSession().getOrCreate()
-        else:
-            DatabricksSession.builder.getOrCreate()
+
+# def pytest_configure(config: pytest.Config):
+#     """Configure pytest session."""
+#     with _allow_stderr_output(config):
+#         _enable_fallback_compute()
+
+#         # Initialize Spark session eagerly, so it is available even when
+#         # SparkSession.builder.getOrCreate() is used. For DB Connect 15+,
+#         # we validate version compatibility with the remote cluster.
+#         if hasattr(DatabricksSession.builder, "validateSession"):
+#             DatabricksSession.builder.validateSession().getOrCreate()
+#         else:
+#             DatabricksSession.builder.getOrCreate()

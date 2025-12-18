@@ -13,10 +13,12 @@ catalog = sys.argv[1]
 df = spark.read.table(f"{catalog}.02_silver.jc_citibike")
 
 df = df.groupBy("trip_start_date").agg(
-    round(max("get_trip_duration_mins"),2).alias("max_trip_duration_mins"),
-    round(min("get_trip_duration_mins"),2).alias("min_trip_duration_mins"),
-    round(avg("get_trip_duration_mins"),2).alias("avg_trip_duration_mins"),
-    count("ride_id").alias("total_trips")
+    round(max("get_trip_duration_mins"), 2).alias("max_trip_duration_mins"),
+    round(min("get_trip_duration_mins"), 2).alias("min_trip_duration_mins"),
+    round(avg("get_trip_duration_mins"), 2).alias("avg_trip_duration_mins"),
+    count("ride_id").alias("total_trips"),
 )
 
-df.write.mode("overwrite").options(overwriteSchema=True).saveAsTable(f"{catalog}.03_gold.daily_ride_summary")
+df.write.mode("overwrite").options(overwriteSchema=True).saveAsTable(
+    f"{catalog}.03_gold.daily_ride_summary"
+)

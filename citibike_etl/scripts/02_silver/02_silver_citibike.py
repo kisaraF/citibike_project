@@ -17,16 +17,24 @@ processed_timestamp = sys.argv[4]
 catalog = sys.argv[5]
 
 df = spark.read.table(f"{catalog}.01_bronze.jc_citibike")
-df = get_trip_duration_mins(spark, df, "started_at", "ended_at", "get_trip_duration_mins")
+df = get_trip_duration_mins(
+    spark, df, "started_at", "ended_at", "get_trip_duration_mins"
+)
 df = timestamp_to_date_col(spark, df, "started_at", "trip_start_date")
 
-df = df.withColumn("metadata",
-                   create_map(
-                       lit("pipeline_id"), lit(pipeline_id),
-                       lit("run_id"), lit(run_id),
-                       lit("task_id"), lit(task_id),
-                       lit("processed_timestamp"), lit(processed_timestamp)
-                   ))
+df = df.withColumn(
+    "metadata",
+    create_map(
+        lit("pipeline_id"),
+        lit(pipeline_id),
+        lit("run_id"),
+        lit(run_id),
+        lit("task_id"),
+        lit(task_id),
+        lit("processed_timestamp"),
+        lit(processed_timestamp),
+    ),
+)
 
 df = df.select(
     "ride_id",
@@ -36,7 +44,9 @@ df = df.select(
     "start_station_name",
     "end_station_name",
     "get_trip_duration_mins",
-    "metadata"
+    "metadata",
 )
 
-df.write.mode("overwrite").options(overwriteSchema=True).saveAsTable(f"{catalog}.02_silver.jc_citibike")
+df.write.mode("overwrite").options(overwriteSchema=True).saveAsTable(
+    f"{catalog}.02_silver.jc_citibike"
+)

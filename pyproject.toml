@@ -13,6 +13,7 @@ dependencies = [
     # add dependencies to the 'environment' section of your pipeline.yml file instead
     "databricks-sdk>=0.74.0",
     "ipykernel>=7.1.0",
+    "pytest>=9.0.2",
     "ruff>=0.14.9",
     "setuptools>=80.9.0",
     "wheel>=0.45.1",
